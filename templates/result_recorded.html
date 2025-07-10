@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Result (Recorded Audio)</title>
+</head>
+<body>
+    <h1>Prediction Result</h1>
+    <p><strong>Diagnosis:</strong> {{ prediction }}</p>
+
+    <h3>Spectrogram:</h3>
+    {% if spectrogram_path %}
+        <img src="{{ url_for('static', filename=spectrogram_path) }}" alt="Spectrogram">
+    {% else %}
+        <p>No spectrogram available.</p>
+    {% endif %}
+
+    <a href="/record">Record Another Audio</a>
+</body>
+</html>

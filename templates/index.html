@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Information & Audio Input</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        function savePatientData(event) {
+            event.preventDefault();
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+
+            sessionStorage.setItem("patientName", name);
+            sessionStorage.setItem("patientAge", age);
+
+            document.getElementById("audioOptions").style.display = "block"; // Show audio options
+            document.getElementById("formSection").style.display = "none"; // Hide form after submission
+        }
+
+        function loadPatientData() {
+            document.getElementById("displayName").innerText = sessionStorage.getItem("patientName");
+            document.getElementById("displayAge").innerText = sessionStorage.getItem("patientAge");
+        }
+    </script>
+</head>
+<body>
+    <h1>Enter Patient Information</h1>
+
+    <div id="formSection">
+        <form onsubmit="savePatientData(event)">
+            <label for="name">Patient Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" required>
+
+            <button type="submit">Next</button>
+        </form>
+    </div>
+
+    <div id="audioOptions" style="display: none;">
+        <h2>Audio Input Method</h2>
+        <p>Patient: <span id="displayName"></span> (Age: <span id="displayAge"></span>)</p>
+
+        <div class="container">
+            <a href="/record"><button>Record Audio</button></a>
+            <a href="/upload"><button>Upload Audio File</button></a>
+        </div>
+    </div>
+
+    <script>loadPatientData();</script>
+</body>
+</html>

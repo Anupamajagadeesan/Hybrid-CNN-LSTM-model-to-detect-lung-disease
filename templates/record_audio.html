@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Record Audio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        function toggleRecording() {
+            if (!isRecording) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        audioChunks = [];
+                        document.getElementById('record_button').textContent = "Stop Recording";
+                        document.getElementById('recording_status').textContent = "Recording...";
+                        isRecording = true;
+
+                        mediaRecorder.ondataavailable = event => {
+                            audioChunks.push(event.data);
+                        };
+
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            document.getElementById('audio_playback').src = audioUrl;
+                            document.getElementById('submit_button').disabled = false;
+                        };
+                    })
+                    .catch(error => console.error("Error accessing microphone:", error));
+            } else {
+                mediaRecorder.stop();
+                document.getElementById('record_button').textContent = "Start Recording";
+                document.getElementById('recording_status').textContent = "Recording stopped.";
+                isRecording = false;
+            }
+        }
+
+        function submitRecording(event) {
+            event.preventDefault();
+            const formData = new FormData();
+            formData.append('audio_file', new Blob(audioChunks, { type: 'audio/wav' }), 'recorded_audio.wav');
+
+            fetch('/predict_recorded', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => console.error("Upload error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Record Audio</h1>
+
+    <button id="record_button" onclick="toggleRecording()">Start Recording</button>
+    <p id="recording_status">Status: Idle</p>
+    <audio id="audio_playback" controls></audio>
+
+    <form onsubmit="submitRecording(event)">
+        <button type="submit" id="submit_button" disabled>Submit for Analysis</button>
+    </form>
+</body>
+</html>

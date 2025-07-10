@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Audio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script>
+        function displayFileName() {
+            var fileInput = document.getElementById('file');
+            var fileNameDisplay = document.getElementById('fileName');
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.innerText = "Selected File: " + fileInput.files[0].name;
+                fileNameDisplay.style.opacity = 1;
+            }
+        }
+
+        function submitFile(event) {
+            event.preventDefault();
+            const formData = new FormData(document.getElementById("uploadForm"));
+
+            fetch('/predict_manual', {
+                method: 'POST',
+                body: formData
+            }).then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            }).catch(error => console.error("Upload error:", error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Upload an Audio File</h1>
+
+    <form id="uploadForm" onsubmit="submitFile(event)" enctype="multipart/form-data">
+        <label for="file">Choose an audio file:</label>
+        <input type="file" id="file" name="file" accept="audio/*" required onchange="displayFileName()">
+        <p id="fileName"></p>
+
+        <button type="submit">Analyze</button>
+    </form>
+</body>
+</html>
